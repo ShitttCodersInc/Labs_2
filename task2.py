@@ -29,7 +29,7 @@ b0=get_b0(y_agv=y_avg, b1=b1, x_agv=x_avg)
 #--------------------------------
 # Проверка значимости коэффициентов
 
-S_y_star = ((1/n-2) * (sum(Y[k] - b0 - b1 * X[k] for k in range(n)))**2)**0.5
+S_y_star = ((1/(n-2)) * (sum(Y[k] - b0 - b1 * X[k] for k in range(n)))**2)**0.5
 
 get_S_b0 = lambda S_y_star, n, x_agv, S_x: S_y * (1/n + x_avg ** 2 / ((n-1) * S_x ** 2)) ** 0.5
 get_S_b1 = lambda S_y_star, n, X: ((( S_y_star**2) * n) /(n * (sum(X[k] ** 2 for k in range(n))) - sum(X[k] for k in range(n)) ** 2 )) ** 0.5
@@ -50,11 +50,12 @@ print('Коэффициент b1 значим для alpha = 0.05') if abs(b1) >
 get_f = lambda x, b0, b1: b0 + b1 * x
 f = get_f(x=X, b0=b0, b1=b1)
 
-S_y_out = ((1/n-1) * (sum(Y[k] - y_avg for k in range(n)) ** 2)) ** 0.5
-S_y_ost = ((1/n-3) * sum(Y[k] - f for k in range(n)) ** 2) ** 0.5
+S_y_out = ((1/(n-1)) * sum(Y[k] - y_avg for k in range(n)) ** 2) ** 0.5
+S_y_ost = ((1/(n-3)) * sum(Y[k] - f[k] for k in range(n)) ** 2) ** 0.5
 
 # Экспериментальное значение F-критерия
 
 F = S_y_out / S_y_ost
+
 print('Уравнение регрессии адекватно для alpha = 0.01') if F > stats.f.ppf(alpha1, n-1, n-2) else print('Уравнение регрессии адекватно для alpha = 0.01')
 print('Уравнение регрессии адекватно для alpha = 0.05') if F > stats.f.ppf(alpha2, n-1, n-2) else print('Уравнение регрессии адекватно для alpha = 0.05')
