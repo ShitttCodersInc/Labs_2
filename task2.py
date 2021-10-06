@@ -1,6 +1,8 @@
 from statistics import mean, variance
 from scipy import stats
 import numpy as np
+from math import sqrt
+
 n = 50
 
 X = np.array([i+1 for i in range(50)])
@@ -16,7 +18,14 @@ alpha2 = 0.05
 x_avg, y_avg = mean(X), mean(Y)
 S_x, S_y = variance(X), variance(Y)
 
-r_xy = (sum((X[k] - x_avg) * (Y[k] - y_avg) for k in range(n)) / (n - 1))
+r_xy = sum((X[k] - x_avg) * (Y[k] - y_avg) for k in range(n)) / sqrt(sum((x-x_avg)**2 for x in X) * sum((y-y_avg)**2 for y in Y))
+
+print('x_avg =', x_avg)
+print('y_avg =', y_avg)
+print('S_x =', S_x)
+print('S_y =', S_y)
+print('r_xy =', r_xy)
+print()
 
 #------------------------------------
 # Коэффициенты уравления регрессии
@@ -37,13 +46,25 @@ get_S_b1 = lambda S_y_star, n, X: ((( S_y_star**2) * n) /(n * (sum(X[k] ** 2 for
 S_b0 = get_S_b0(S_y_star=S_y_star, n=n, x_agv=x_avg, S_x=S_x)
 S_b1 = get_S_b1(S_y_star=S_y_star, n=n, X=X)
 
-delta_b0 = stats.t.ppf(alpha1, 48) * S_b0
-delta_b1 = stats.t.ppf(alpha2, 48) * S_b1
+delta_b0_a1 = stats.t.ppf(alpha1, 48) * S_b0
+delta_b1_a1 = stats.t.ppf(alpha1, 48) * S_b1
 
-print('Коэффициент b0 значим для alpha = 0.01') if abs(b0) > abs(delta_b0) else print('Коэффициент b0 не значим для alpha = 0.01')
-print('Коэффициент b0 значим для alpha = 0.05') if abs(b0) > abs(delta_b1) else print('Коэффициент b0 не значим для alpha = 0.05')
-print('Коэффициент b1 значим для alpha = 0.01') if abs(b1) > abs(delta_b0) else print('Коэффициент b1 не значим для alpha = 0.01')
-print('Коэффициент b1 значим для alpha = 0.05') if abs(b1) > abs(delta_b1) else print('Коэффициент b1 не значим для alpha = 0.05')
+delta_b0_a2 = stats.t.ppf(alpha2, 48) * S_b0
+delta_b1_a2 = stats.t.ppf(alpha2, 48) * S_b1
+
+print('Коэффициент b0 значим для alpha = 0.01') if abs(b0) > abs(delta_b0_a1) else print('Коэффициент b0 не значим для alpha = 0.01')
+print('Коэффициент b1 значим для alpha = 0.01') if abs(b1) > abs(delta_b1_a1) else print('Коэффициент b1 не значим для alpha = 0.01')
+
+print('Коэффициент b1 значим для alpha = 0.05') if abs(b0) > abs(delta_b0_a2) else print('Коэффициент b0 не значим для alpha = 0.05')
+print('Коэффициент b1 значим для alpha = 0.05') if abs(b1) > abs(delta_b1_a2) else print('Коэффициент b1 не значим для alpha = 0.05')
+
+
+print('\nb0 =', b0, 'b1 =', b1)
+print('delta_b0_a1 =', delta_b0_a1, "delta_b1_a1 =", delta_b0_a1)
+print('delta_b0_a2 =', delta_b0_a2, "delta_b1_a2 =", delta_b0_a2)
+print()
+
+
 #-------------------------------
 # Проверка адекватности модели
 
@@ -57,5 +78,9 @@ S_y_ost = ((1/(n-3)) * sum(Y[k] - f[k] for k in range(n)) ** 2) ** 0.5
 
 F = S_y_out / S_y_ost
 
-print('Уравнение регрессии адекватно для alpha = 0.01') if F > stats.f.ppf(alpha1, n-1, n-2) else print('Уравнение регрессии адекватно для alpha = 0.01')
-print('Уравнение регрессии адекватно для alpha = 0.05') if F > stats.f.ppf(alpha2, n-1, n-2) else print('Уравнение регрессии адекватно для alpha = 0.05')
+print('Уравнение регрессии адекватно для alpha = 0.01') if F > stats.f.ppf(alpha1, n-1, n-2) else print('Уравнение регрессии не адекватно для alpha = 0.01')
+print('Уравнение регрессии адекватно для alpha = 0.05') if F > stats.f.ppf(alpha2, n-1, n-2) else print('Уравнение регрессии не адекватно для alpha = 0.05')
+
+print('F =', F)
+print('F1 =', stats.f.ppf(alpha1, n-1, n-2))
+print('F2 =', stats.f.ppf(alpha2, n-1, n-2))
